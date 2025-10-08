@@ -1,0 +1,10 @@
+# Python virtual environment
+backend/venv/
+
+# Python cache
+backend/__pycache__/
+*.pyc
+
+# Optional: other files
+backend/*.sqlite3
+backend/*.log
