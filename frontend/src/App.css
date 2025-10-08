@@ -1,0 +1,164 @@
+/* src/App.css */
+
+body, .dashboard {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1e1e2f;
+  color: #fff;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.header {
+  text-align: center;
+  padding: 2rem 0;
+  background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  color: #00ffea;
+}
+
+.start-game {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.btn-primary {
+  background-color: #00ffea;
+  color: #1e1e2f;
+  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #00d4b8;
+  transform: scale(1.05);
+}
+
+.scoreboard {
+  margin: 2rem auto;
+  max-width: 95%;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background-color: #2a2a3e;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.score-table th, .score-table td {
+  padding: 0.8rem;
+  text-align: center;
+}
+
+.score-table thead {
+  background-color: #33334d;
+}
+
+.score-table tbody tr:nth-child(even) {
+  background-color: #26263d;
+}
+
+.winner-row {
+  background-color: #003300 !important;
+  color: #00ffea;
+  font-weight: bold;
+}
+
+.shield-icon {
+  color: #00ffea;
+  margin-left: 5px;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px #00ffea, 0 0 10px #00ffea;
+  }
+  to {
+    text-shadow: 0 0 15px #00ffea, 0 0 25px #00ffff;
+  }
+}
+
+.empty {
+  text-align: center;
+  font-style: italic;
+  margin-top: 1rem;
+  color: #aaa;
+}
+
+.footer {
+  text-align: center;
+  padding: 1rem 0;
+  background-color: #0f2027;
+  margin-top: 3rem;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.game-panel {
+  background-color: #2a2a3e;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border-radius: 12px;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.game-panel h2 {
+  color: #00ffea;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.scoreboard-panel p {
+  margin: 0.5rem 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  justify-content: center;
+}
+
+.actions button {
+  flex: 1 1 30%;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #00ffea;
+  color: #1e1e2f;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actions button:hover {
+  background-color: #00d4b8;
+  transform: scale(1.05);
+}
+
+.log {
+  background-color: #1e1e2f;
+  padding: 1rem;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  color: #00ffea;
+}
