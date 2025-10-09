@@ -1,115 +1,151 @@
-import './App.css';
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Game from "./components/Game";
-import { FiShield } from "react-icons/fi";
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import './App.css'; 
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+// ----------------------------------------------------------------------
+// 1. ABSOLUTE API URL DEFINITION (THE FIX)
+// This is the CRITICAL line that ensures API calls go to your deployed backend.
+// ----------------------------------------------------------------------
+const API_BASE_URL = 'https://backend-6zp1z6j6o-mahanthipavankalyan-techs-projects.vercel.app';
+// ----------------------------------------------------------------------
+
+
+// --- Placeholder Components (Replace these with your actual UI) ---
+const GameComponent = ({ onSubmit }) => (
+    <div style={{ padding: '20px', border: '1px solid #ccc' }}>
+        <h2>Cyber Awareness Game</h2>
+        {/* Replace this with your game logic */}
+        <p>Game is running...</p>
+        <button onClick={() => onSubmit(Math.floor(Math.random() * 100))}>
+            Finish Game & Submit Result
+        </button>
+    </div>
+);
+
+const ScoreboardComponent = ({ scores }) => (
+    <div style={{ padding: '20px', marginTop: '20px' }}>
+        <h2>Scoreboard</h2>
+        {scores.length === 0 ? (
+            <p>Loading scores or no scores submitted yet...</p>
+        ) : (
+            <ol>
+                {scores.map((score, index) => (
+                    <li key={index}>
+                        {score.nickname} - {score.score} points
+                    </li>
+                ))}
+            </ol>
+        )}
+    </div>
+);
+
+const ResultSubmission = ({ score, onSave }) => {
+    const [nickname, setNickname] = useState('');
+    return (
+        <div style={{ padding: '20px', border: '1px solid #ccc', marginTop: '20px' }}>
+            <h2>Game Over! Score: {score}</h2>
+            <input 
+                type="text" 
+                placeholder="Enter Nickname" 
+                value={nickname} 
+                onChange={(e) => setNickname(e.target.value)} 
+            />
+            <button onClick={() => onSave(nickname, score)} disabled={!nickname}>
+                Save Score
+            </button>
+        </div>
+    );
+};
+// ----------------------------------------------------------------------
+
 
 function App() {
-  const [scoreboard, setScoreboard] = useState([]);
-  const [showGame, setShowGame] = useState(false);
-  const [playerName, setPlayerName] = useState("");
+    // State to manage what view to show (e.g., 'game', 'result', 'scoreboard')
+    const [view, setView] = useState('game');
+    const [lastScore, setLastScore] = useState(0);
+    const [scoreboardData, setScoreboardData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-  const fetchScoreboard = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/api/scoreboard`);
-      setScoreboard(res.data);
-    } catch (err) {
-      console.error("Fetch scoreboard failed:", err);
-    }
-  };
+    // ----------------------------------------------------------------------
+    // 2. FETCH SCOREBOARD (Uses the absolute URL)
+    // ----------------------------------------------------------------------
+    const fetchScoreboard = useCallback(async () => {
+        setLoading(true);
+        try {
+            // CRITICAL FIX: Use the full API_BASE_URL
+            const response = await axios.get(`${API_BASE_URL}/api/scoreboard`);
+            setScoreboardData(response.data);
+        } catch (error) {
+            console.error('Error fetching scoreboard:', error);
+            // Handle error (e.g., set an error message in state)
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  useEffect(() => {
-    fetchScoreboard();
-  }, []);
+    useEffect(() => {
+        fetchScoreboard();
+    }, [fetchScoreboard]);
 
-  // Prompt for player name before starting the game
-  const handleStartMatch = () => {
-    const name = prompt("Enter your Name:");
-    if (name && name.trim() !== "") {
-      setPlayerName(name);
-      setShowGame(true);
-    } else {
-      alert("Please enter a valid name to start the match.");
-    }
-  };
+    // Function called when the user finishes the game
+    const handleGameSubmit = (score) => {
+        setLastScore(score);
+        setView('result');
+    };
 
-  const handleGameComplete = (result) => {
-    setShowGame(false);
-    fetchScoreboard(); // Refresh scoreboard
-    // Optional: send result to backend
-    // axios.post(`${API_BASE}/api/result`, { ...result, nickname: playerName });
-  };
+    // ----------------------------------------------------------------------
+    // 3. SUBMIT RESULT (Uses the absolute URL)
+    // ----------------------------------------------------------------------
+    const handleSaveScore = async (nickname, score) => {
+        setLoading(true);
+        const data = { nickname, score };
 
-  return (
-    <div className="dashboard">
-      <header className="header">
-        <h1>Think Like a Hacker. Defend Like a Pro</h1>
-        <h2>" Welcome to Cybersecurity Awareness Challenge Game "</h2>
-      </header>
+        try {
+            // CRITICAL FIX: Use the full API_BASE_URL
+            await axios.post(`${API_BASE_URL}/api/result`, data);
+            
+            // Refetch scores and switch to the scoreboard view
+            await fetchScoreboard();
+            setView('scoreboard');
 
-      <main>
-        {!showGame && (
-          <div className="start-game">
-            <button className="btn-primary" onClick={handleStartMatch}>
-              Start New Match
+        } catch (error) {
+            console.error('Error submitting result:', error.response ? error.response.data : error.message);
+            alert('Failed to save score. Check console for details.');
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="App">
+            <h1>Cyber Awareness App</h1>
+            {loading && <p>Loading...</p>}
+
+            <nav>
+                <button onClick={() => setView('game')}>Play Game</button>
+                <button onClick={() => setView('scoreboard')}>View Scoreboard</button>
+            </nav>
+
+            <hr />
+
+            {view === 'game' && <GameComponent onSubmit={handleGameSubmit} />}
+            
+            {view === 'result' && (
+                <ResultSubmission 
+                    score={lastScore} 
+                    onSave={handleSaveScore} 
+                />
+            )}
+            
+            {(view === 'scoreboard' || view === 'result') && (
+                <ScoreboardComponent scores={scoreboardData} />
+            )}
+            
+            {/* Optional: Add a button to force a scoreboard refresh */}
+            <button onClick={fetchScoreboard} disabled={loading} style={{ marginTop: '20px' }}>
+                Refresh Scores
             </button>
-          </div>
-        )}
-
-        {showGame && (
-          <Game
-            playerName={playerName}
-            apiBase={API_BASE}
-            onComplete={handleGameComplete}
-          />
-        )}
-
-        <section className="scoreboard">
-          <h2>Recent Matches</h2>
-          {scoreboard.length === 0 ? (
-            <p className="empty">No matches yet.</p>
-          ) : (
-            <div className="table-wrapper">
-              <table className="score-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Defender</th>
-                    <th>Attacker</th>
-                    <th>Time(s)</th>
-                    <th>Winner</th>
-                    <th>Awareness Level</th>
-                    <th>Timestamp (UTC)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {scoreboard.map((r, i) => (
-                    <tr key={i} className={r.winner === r.nickname ? "winner-row" : ""}>
-                      <td>{r.nickname}</td>
-                      <td>{r.defender_score}</td>
-                      <td>{r.attacker_score}</td>
-                      <td>{r.time_sec}</td>
-                      <td>
-                        {r.winner} {r.winner === r.nickname && <FiShield className="shield-icon" />}
-                      </td>
-                      <td>{r.predicted_level}</td>
-                      <td>{new Date(r.created_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      </main>
-
-      <footer className="footer">
-        <p>© 2025 Cyber Awareness Dashboard</p>
-      </footer>
-    </div>
-  );
+        </div>
+    );
 }
 
 export default App;
